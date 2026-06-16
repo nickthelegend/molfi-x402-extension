@@ -157,107 +157,16 @@ export class MolfiChatViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async _getHtmlForWebview(webview: vscode.Webview): Promise<string> {
+    const stylesUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionContext.extensionUri, 'src', 'webview', 'styles.css')
+    );
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background-color: #0a0a0b;
-      color: #f5f5f7;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      box-sizing: border-box;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .message {
-      padding: 8px 12px;
-      border-radius: 8px;
-      max-width: 85%;
-      font-size: 13px;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
-    .user {
-      align-self: flex-end;
-      background-color: #E84142;
-      color: #fff;
-    }
-    .assistant {
-      align-self: flex-start;
-      background-color: #17171c;
-      border: 1px solid #26262d;
-      color: #f5f5f7;
-    }
-    .status {
-      font-size: 11px;
-      color: #E84142;
-      font-style: italic;
-      margin-left: 4px;
-    }
-    .badge {
-      display: inline-block;
-      font-size: 9px;
-      background: rgba(232, 65, 66, 0.1);
-      border: 1px solid rgba(232, 65, 66, 0.2);
-      color: #E84142;
-      padding: 1px 4px;
-      border-radius: 3px;
-      margin-top: 4px;
-      text-decoration: none;
-      font-family: monospace;
-    }
-    #input-container {
-      display: flex;
-      gap: 6px;
-    }
-    input {
-      flex: 1;
-      background-color: #111114;
-      border: 1px solid #26262d;
-      color: #f5f5f7;
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 13px;
-      outline: none;
-    }
-    input:focus {
-      border-color: #E84142;
-    }
-    button {
-      background-color: #E84142;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    button:hover {
-      background-color: #ff6b6c;
-    }
-    #wallet-info {
-      font-size: 10px;
-      color: #9b9ba3;
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #26262d;
-      font-family: monospace;
-    }
-  </style>
+  <link href="${stylesUri}" rel="stylesheet">
 </head>
 <body>
   <div id="wallet-info">Fuji Wallet: Loading...</div>
