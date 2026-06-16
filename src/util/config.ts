@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 export function getConfig() {
   const cfg = vscode.workspace.getConfiguration('molfi');
   return {
-    backendUrl: cfg.get<string>('backendUrl', 'http://localhost:3001'),
+    backendUrl: cfg.get<string>('backendUrl', 'http://localhost:8787'),
     defaultModel: cfg.get<string>('defaultModel', 'llama-3.3-70b'),
     ads: {
       enabled: cfg.get<boolean>('ads.enabled', true),

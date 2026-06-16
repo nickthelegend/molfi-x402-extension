@@ -60,7 +60,7 @@
       "properties": {
         "molfi.backendUrl": {
           "type": "string",
-          "default": "http://localhost:3001",
+          "default": "http://localhost:8787",
           "description": "Base URL of the Molfi backend."
         },
         "molfi.defaultModel": {

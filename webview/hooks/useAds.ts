@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { onHostMessage, postToHost } from "../lib/messageBus";
 
 export function useAds(creditJwtRef: React.MutableRefObject<string | null>) {
-  const [backendUrl, setBackendUrl] = useState<string>("http://localhost:3001");
+  const [backendUrl, setBackendUrl] = useState<string>("http://localhost:8787");
   const [activeTextAd, setActiveTextAd] = useState<any | null>(null);
   const [activeVideoAd, setActiveVideoAd] = useState<any | null>(null);
   const [isAdClaimed, setIsAdClaimed] = useState(false);
