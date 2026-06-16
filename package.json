@@ -1,0 +1,72 @@
+{
+  "name": "molfi-extension",
+  "displayName": "Molfi Dev Companion",
+  "description": "Stablecoin-powered coding assistant on Avalanche Fuji using x402.",
+  "version": "1.0.0",
+  "publisher": "nickthelegend",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "molfi-sidebar",
+          "title": "Molfi Chat",
+          "icon": "media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "molfi-sidebar": [
+        {
+          "type": "webview",
+          "id": "molfi.chatView",
+          "name": "Molfi Chat"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "molfi.connectWallet",
+        "title": "Molfi: Connect Wallet"
+      },
+      {
+        "command": "molfi.setBackendUrl",
+        "title": "Molfi: Set Backend URL"
+      },
+      {
+        "command": "molfi.explainSelection",
+        "title": "Molfi: Explain selection"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "molfi.explainSelection",
+          "group": "navigation",
+          "when": "editorHasSelection"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.5.4"
+  }
+}
