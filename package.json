@@ -1,24 +1,21 @@
 {
-  "name": "molfi-extension",
-  "displayName": "Molfi Dev Companion",
-  "description": "Stablecoin-powered coding assistant on Avalanche Fuji using x402.",
-  "version": "1.0.0",
+  "name": "molfi-vscode",
+  "displayName": "Molfi",
+  "description": "Chat with 13+ LLMs, pay-as-you-go via USDC on Avalanche, watch ads to earn credits — right inside VS Code.",
+  "version": "0.1.0",
   "publisher": "nickthelegend",
-  "engines": {
-    "vscode": "^1.80.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
+  "engines": { "vscode": "^1.90.0" },
+  "categories": ["AI", "Chat", "Other"],
+  "activationEvents": ["onStartupFinished"],
   "main": "./dist/extension.js",
+  "icon": "media/molfi-logo.png",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
           "id": "molfi-sidebar",
-          "title": "Molfi Chat",
-          "icon": "media/icon.png"
+          "title": "Molfi",
+          "icon": "media/molfi-logo.svg"
         }
       ]
     },
@@ -27,50 +24,98 @@
         {
           "type": "webview",
           "id": "molfi.chatView",
-          "name": "Molfi Chat"
+          "name": "Chat",
+          "icon": "media/molfi-logo.svg",
+          "contextualTitle": "Molfi"
         }
       ]
     },
     "commands": [
-      {
-        "command": "molfi.connectWallet",
-        "title": "Molfi: Connect Wallet"
-      },
-      {
-        "command": "molfi.setBackendUrl",
-        "title": "Molfi: Set Backend URL"
-      },
-      {
-        "command": "molfi.explainSelection",
-        "title": "Molfi: Explain selection"
-      }
+      { "command": "molfi.newChat",          "title": "Molfi: New Chat",            "icon": "$(add)" },
+      { "command": "molfi.explainSelection", "title": "Molfi: Explain Selection" },
+      { "command": "molfi.refactorSelection","title": "Molfi: Refactor Selection" },
+      { "command": "molfi.generateTests",    "title": "Molfi: Generate Tests" },
+      { "command": "molfi.switchModel",      "title": "Molfi: Switch Model" },
+      { "command": "molfi.topUpCredits",     "title": "Molfi: Top Up Credits" },
+      { "command": "molfi.showWallet",       "title": "Molfi: Show Wallet" },
+      { "command": "molfi.openSettings",     "title": "Molfi: Open Settings" },
+      { "command": "molfi.signOut",          "title": "Molfi: Sign Out" }
     ],
     "menus": {
       "editor/context": [
-        {
-          "command": "molfi.explainSelection",
-          "group": "navigation",
-          "when": "editorHasSelection"
-        }
+        { "command": "molfi.explainSelection",  "when": "editorHasSelection", "group": "molfi@1" },
+        { "command": "molfi.refactorSelection", "when": "editorHasSelection", "group": "molfi@2" },
+        { "command": "molfi.generateTests",     "when": "editorHasSelection", "group": "molfi@3" }
+      ],
+      "view/title": [
+        { "command": "molfi.newChat", "when": "view == molfi.chatView", "group": "navigation" }
       ]
+    },
+    "keybindings": [
+      { "command": "molfi.explainSelection", "key": "ctrl+alt+m e", "mac": "cmd+alt+m e", "when": "editorHasSelection" },
+      { "command": "molfi.newChat",          "key": "ctrl+alt+m n", "mac": "cmd+alt+m n" }
+    ],
+    "configuration": {
+      "title": "Molfi",
+      "properties": {
+        "molfi.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:3001",
+          "description": "Base URL of the Molfi backend."
+        },
+        "molfi.defaultModel": {
+          "type": "string",
+          "default": "llama-3.3-70b",
+          "enum": [
+            "llama-3.3-70b","deepseek-v3","gemini-2.5-flash","gpt-4o-mini",
+            "claude-sonnet-4.5","gpt-4o","claude-opus-4.x",
+            "llama-nemotron-rerank-vl-1b-v2-free","nex-n2-pro-free",
+            "riverflow-v2.5-pro","riverflow-v2.5-fast",
+            "nemotron-3.5-content-safety-free","nemotron-3-ultra-550b-a55b-free"
+          ],
+          "description": "Model to pre-select in new chats."
+        },
+        "molfi.ads.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show text & video ads to earn credits. Disable to chat purely with paid USDC."
+        },
+        "molfi.ads.videoFrequency": {
+          "type": "number",
+          "default": 5,
+          "description": "Show a video ad opportunity every N user messages (only when credits low)."
+        },
+        "molfi.attachActiveFile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically attach the active editor file as context to every message."
+        }
+      }
     }
   },
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
-    "compile": "tsc -b",
-    "watch": "tsc -b -w",
-    "package": "vsce package",
-    "test": "node ./dist/test/runTest.js"
+    "build": "node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "package": "pnpm build && vsce package --no-dependencies",
+    "install:local": "code --install-extension molfi-vscode-$(node -p \"require('./package.json').version\").vsix",
+    "test": "vitest run"
   },
   "dependencies": {
     "viem": "^2.21.0"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.7",
-    "@types/node": "^20.16.5",
-    "@types/vscode": "^1.80.0",
-    "@vscode/test-electron": "^2.4.1",
-    "mocha": "^10.7.3",
-    "typescript": "^5.5.4"
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.24.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "rehype-highlight": "^7.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   }
 }
