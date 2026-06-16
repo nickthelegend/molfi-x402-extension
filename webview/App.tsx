@@ -120,8 +120,8 @@ export default function App() {
           ad={activeVideoAd}
           backendUrl={backendUrl}
           onSkip={dismissVideoAd}
-          onComplete={(watchedMs) => {
-            claimVideoAd(activeVideoAd.impressionToken, watchedMs, "");
+          onComplete={(heartbeats, watchedMs) => {
+            claimVideoAd(activeVideoAd.sessionId, activeVideoAd.nonceHex, heartbeats, watchedMs);
           }}
         />
       )}

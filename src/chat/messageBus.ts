@@ -7,7 +7,6 @@ import { getBalance } from "../api/credits";
 import { ModelEntry } from "../api/models";
 import { insertAtCursor, captureSelection, captureActiveFile } from "../context/editorContext";
 import { StatusBar } from "../status/statusBar";
-import { signHeartbeat } from "../ads/heartbeat";
 
 export type ChatMessage = {
   id: string;
@@ -33,7 +32,7 @@ export type WebviewToHost =
   | { type: "chat.cancel"; messageId: string }
   | { type: "model.change"; modelId: string }
   | { type: "ad.requestNext"; kind: "text" | "video" }
-  | { type: "ad.claim"; adId: string; watchedMs: number; heartbeatToken: string }
+  | { type: "ad.claim"; sessionId: string; nonceHex: string; heartbeats: any[]; watchedMs: number }
   | { type: "balance.refresh" }
   | { type: "wallet.show" }
   | { type: "topup.start"; amountUsdc: number }
@@ -180,17 +179,42 @@ export class MessageBus {
   private async handleAdClaim(msg: Extract<WebviewToHost, { type: "ad.claim" }>, provider: any) {
     try {
       const account = await this.wallet.account();
-      const heartbeatToken = await signHeartbeat(account, msg.adId, msg.watchedMs);
+      const heartbeats = msg.heartbeats;
+
+      const hbMessage = (sessionId: string, nonceHex: string, hb: any) => {
+        return [
+          "molfi:hb:v1",
+          sessionId,
+          nonceHex,
+          String(hb.t),
+          Number(hb.currentTime).toFixed(3),
+          hb.paused ? "1" : "0",
+          hb.muted ? "1" : "0",
+          hb.visible ? "1" : "0",
+          hb.focused ? "1" : "0",
+        ].join("|");
+      };
+
+      if (heartbeats.length > 0) {
+        // Sign first heartbeat
+        const first = heartbeats[0];
+        const firstMsg = hbMessage(msg.sessionId, msg.nonceHex, first);
+        first.sig = await account.signMessage({ message: firstMsg });
+
+        // Sign last heartbeat
+        const last = heartbeats[heartbeats.length - 1];
+        const lastMsg = hbMessage(msg.sessionId, msg.nonceHex, last);
+        last.sig = await account.signMessage({ message: lastMsg });
+      }
 
       const result = (await claimAd(this.api, {
-        impressionToken: msg.adId,
+        sessionId: msg.sessionId,
+        heartbeats,
         watchedMs: msg.watchedMs,
-        lastSeq: -1,
-        completionSig: heartbeatToken,
       })) as any;
 
-      if (result && result.creditJwt) {
-        provider.postToWebview({ type: "ad.claimed", creditsEarned: 1, creditJwt: result.creditJwt });
+      if (result && result.jwt) {
+        provider.postToWebview({ type: "ad.claimed", creditsEarned: 5, creditJwt: result.jwt });
         await this.refreshBalance(provider);
       }
     } catch (err: any) {

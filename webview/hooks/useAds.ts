@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { onHostMessage, postToHost } from "../lib/messageBus";
 
 export function useAds(creditJwtRef: React.MutableRefObject<string | null>) {
@@ -33,20 +33,23 @@ export function useAds(creditJwtRef: React.MutableRefObject<string | null>) {
   };
 
   const claimTextAd = (impressionToken: string, durationMs: number) => {
+    // Legacy support or fallback
     postToHost({
       type: "ad.claim",
-      adId: impressionToken,
+      sessionId: impressionToken,
+      nonceHex: "",
+      heartbeats: [],
       watchedMs: durationMs,
-      heartbeatToken: "",
     });
   };
 
-  const claimVideoAd = (impressionToken: string, watchedMs: number, heartbeatToken: string) => {
+  const claimVideoAd = (sessionId: string, nonceHex: string, heartbeats: any[], watchedMs: number) => {
     postToHost({
       type: "ad.claim",
-      adId: impressionToken,
+      sessionId,
+      nonceHex,
+      heartbeats,
       watchedMs,
-      heartbeatToken,
     });
   };
 

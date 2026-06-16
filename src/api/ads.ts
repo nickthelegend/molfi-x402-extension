@@ -1,40 +1,44 @@
 import { ApiClient } from "./client";
 
 export type AdSlot = {
-  impressionId: string;
-  impressionToken: string;
-  campaignId: string;
-  mp4Url: string;
-  imageUrl: string;
-  durationMs: number;
-  bidPerViewUsdc: string;
+  sessionId: string;
+  nonceHex: string;
+  campaignId: number;
+  kind: "TEXT" | "IMAGE" | "VIDEO";
+  contentURI: string;
+  thumbnailCid?: string;
+  title: string;
+  description?: string;
+  ctaText?: string;
   ctaUrl: string;
-  heartbeatIntervalMs: number;
+  durationMs: number;
+  rewardUsdc: string;
   type: "video" | "image";
 };
 
 export async function fetchNextAd(client: ApiClient, surface: "extension"): Promise<AdSlot | null> {
-  const session = `session-${Date.now()}-${Math.random()}`;
-  const res = await client.fetch(`/v1/ads/slot?slotId=sidebar&session=${session}&surface=${surface}`, {
+  const res = await client.fetch(`/v1/ads/start`, {
     method: "POST",
+    body: JSON.stringify({
+      surface,
+      kind: "video", // Request video ad
+    }),
   });
   if (res.status === 204) return null;
   if (!res.ok) throw new Error(`Fetch ad slot failed: ${res.status}`);
   const data = (await res.json()) as any;
-  const isVideo = data.mp4Url && (data.mp4Url.toLowerCase().endsWith(".mp4") || data.mp4Url.toLowerCase().includes("uploads"));
   return {
     ...data,
-    type: isVideo ? "video" : "image",
+    type: "video",
   };
 }
 
 export async function claimAd(
   client: ApiClient,
   body: {
-    impressionToken: string;
+    sessionId: string;
+    heartbeats: any[];
     watchedMs: number;
-    lastSeq: number;
-    completionSig?: string;
   }
 ) {
   const res = await client.fetch("/v1/ads/claim", {
