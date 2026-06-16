@@ -59,14 +59,18 @@
     "vscode:prepublish": "pnpm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "package": "vsce package"
+    "package": "vsce package",
+    "test": "node ./dist/test/runTest.js"
   },
   "dependencies": {
     "viem": "^2.21.0"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.7",
     "@types/node": "^20.16.5",
     "@types/vscode": "^1.80.0",
+    "@vscode/test-electron": "^2.4.1",
+    "mocha": "^10.7.3",
     "typescript": "^5.5.4"
   }
 }
