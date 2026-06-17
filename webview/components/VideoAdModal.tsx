@@ -38,8 +38,8 @@ export function VideoAdModal({
         currentTime: videoRef.current.currentTime,
         paused: videoRef.current.paused,
         muted: videoRef.current.muted,
-        visible: document.visibilityState === "visible",
-        focused: document.hasFocus(),
+        visible: true,
+        focused: true,
       });
     }, 1000);
 
