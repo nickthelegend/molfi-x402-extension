@@ -69,6 +69,7 @@ export async function* streamChat(
         method: "POST",
         headers: {
           "X-PAYMENT": xPaymentBase64,
+          "Authorization": "",
         },
         body: JSON.stringify({
           model: body.model,

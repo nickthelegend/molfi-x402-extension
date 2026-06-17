@@ -8,7 +8,7 @@ export class ApiClient {
     const url = `${getConfig().backendUrl}${path}`;
     const headers = (init.headers as Record<string, string>) || {};
     let jwt = "";
-    if (!headers["Authorization"]) {
+    if (headers["Authorization"] === undefined) {
       try {
         jwt = await this.siwe.getJwt();
       } catch (e) {
