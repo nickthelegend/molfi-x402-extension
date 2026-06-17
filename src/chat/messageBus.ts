@@ -4,7 +4,7 @@ import { WalletStore } from "../auth/walletStore";
 import { streamChat } from "../api/chat";
 import { fetchNextAd, claimAd } from "../api/ads";
 import { getBalance } from "../api/credits";
-import { ModelEntry } from "../api/models";
+import { ModelEntry, fetchModels } from "../api/models";
 import { insertAtCursor, captureSelection, captureActiveFile } from "../context/editorContext";
 import { StatusBar } from "../status/statusBar";
 
@@ -38,6 +38,7 @@ export type WebviewToHost =
   | { type: "topup.start"; amountUsdc: number }
   | { type: "code.insert"; code: string; language?: string }
   | { type: "context.request"; contextType: "file" | "selection" }
+  | { type: "ready" }
   | { type: "log"; level: "info" | "warn" | "error"; message: string };
 
 export class MessageBus {
@@ -75,6 +76,9 @@ export class MessageBus {
         break;
       case "balance.refresh":
         await this.refreshBalance(provider);
+        break;
+      case "ready":
+        await this.sendInitData(provider);
         break;
       case "wallet.show":
         await vscode.commands.executeCommand("molfi.showWallet");
@@ -229,5 +233,27 @@ export class MessageBus {
     const cfg = vscode.workspace.getConfiguration("molfi");
     const activeModel = cfg.get<string>("defaultModel", "llama-3.3-70b");
     this.statusBar.update(activeModel, bal.credits);
+  }
+
+  async sendInitData(provider: any) {
+    try {
+      const address = await this.wallet.getAddress();
+      const bal = await getBalance(this.api);
+      const models = await fetchModels(this.api);
+      const cfg = vscode.workspace.getConfiguration("molfi");
+      const defaultModel = cfg.get<string>("defaultModel", "llama-3.3-70b");
+      const backendUrl = cfg.get<string>("backendUrl", "http://localhost:8787");
+
+      provider.postToWebview({
+        type: "init",
+        address,
+        balance: bal,
+        models,
+        defaultModel,
+        backendUrl,
+      });
+    } catch (err) {
+      console.error("Failed to send init data:", err);
+    }
   }
 }

@@ -36,6 +36,10 @@ export default function App() {
   const [inputText, setInputText] = useState("");
 
   useEffect(() => {
+    postToHost({ type: "ready" });
+  }, []);
+
+  useEffect(() => {
     return onHostMessage((msg) => {
       if (msg.type === "context.attached") {
         setAttachedContext({
